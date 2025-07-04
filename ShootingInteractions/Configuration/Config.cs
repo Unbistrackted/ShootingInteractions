@@ -1,10 +1,16 @@
-﻿using Exiled.API.Interfaces;
+﻿#if EXILED
+using Exiled.API.Interfaces;
+#endif
 using ShootingInteractions.Configuration.Bases;
 using System.ComponentModel;
 
 namespace ShootingInteractions.Configuration
 {
+#if EXILED
     public sealed class Config : IConfig
+#else
+    public sealed class Config
+#endif
     {
         [Description("Is the plugin enabled")]
         public bool IsEnabled { get; set; } = true;
@@ -47,9 +53,11 @@ namespace ShootingInteractions.Configuration
 
         [Description("Flashbangs interaction")]
         public TimedProjectilesInteraction Flashbangs { get; set; } = new();
+#if EXILED
 
         [Description("Custom grenades interaction")]
         public ProjectilesInteraction CustomGrenades { get; set; } = new();
+#endif
 
         [Description("Nuke start button interaction")]
         public NukeButtonsInteraction NukeStartButton { get; set; } = new();

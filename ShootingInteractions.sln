@@ -1,25 +1,40 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.1.32210.238
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShootingInteractions", "ShootingInteractions\ShootingInteractions.csproj", "{CAB84CFC-2008-4CDB-84AB-2446E1E5CF81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShootingInteractions", "ShootingInteractions\ShootingInteractions.csproj", "{D1407717-516B-4BA1-B938-E66D924D6B95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		EXILED|Any CPU = EXILED|Any CPU
+		EXILED|x64 = EXILED|x64
+		LabAPI|Any CPU = LabAPI|Any CPU
+		LabAPI|x64 = LabAPI|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CAB84CFC-2008-4CDB-84AB-2446E1E5CF81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CAB84CFC-2008-4CDB-84AB-2446E1E5CF81}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CAB84CFC-2008-4CDB-84AB-2446E1E5CF81}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CAB84CFC-2008-4CDB-84AB-2446E1E5CF81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Debug|x64.ActiveCfg = Debug|x64
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Debug|x64.Build.0 = Debug|x64
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.EXILED|Any CPU.ActiveCfg = EXILED|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.EXILED|Any CPU.Build.0 = EXILED|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.EXILED|x64.ActiveCfg = EXILED|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.EXILED|x64.Build.0 = EXILED|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.LabAPI|Any CPU.ActiveCfg = LabAPI|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.LabAPI|Any CPU.Build.0 = LabAPI|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.LabAPI|x64.ActiveCfg = LabAPI|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.LabAPI|x64.Build.0 = LabAPI|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Release|x64.ActiveCfg = Release|x64
+		{D1407717-516B-4BA1-B938-E66D924D6B95}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D3A3E8DF-A867-4775-906A-9546A0565FEA}
 	EndGlobalSection
 EndGlobal

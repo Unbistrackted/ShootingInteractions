@@ -1,11 +1,17 @@
-﻿using Exiled.API.Enums;
+﻿# if EXILED
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.API.Features.Pickups;
+using PlayerEvents = Exiled.Events.Handlers.Player;
+# else
+using LabApi.Loader.Features.Plugins;
+using LabApi.Events.Handlers;
+#endif
 using ShootingInteractions.Configuration;
+using ShootingInteractions.Properites;
 using System;
-using System.Linq;
 using System.Reflection;
-using PlayerEvent = Exiled.Events.Handlers.Player;
+using System.Linq;
 
 namespace ShootingInteractions
 {
@@ -15,22 +21,30 @@ namespace ShootingInteractions
 
         public static Plugin Instance { get; private set; }
 
-        public override string Name => "ShootingInteractions";
+        public override string Name => AssemblyInfo.Name;
 
-        public override string Author => "Ika, Maintained by Unbistrackted";
-
+        public override string Author => AssemblyInfo.Author;
+#if EXILED
         public override Version RequiredExiledVersion => new(9, 6, 1);
-
-        public override Version Version => new(2, 5, 1);
-
         public override PluginPriority Priority => PluginPriority.First;
+#else
+        public override Version RequiredApiVersion => new(1, 1, 0);
+        public override string Description => AssemblyInfo.Description;
+#endif
+
+        public override Version Version => new(AssemblyInfo.Version);
 
         private EventsHandler eventsHandler;
-
+#if EXILED
         public override void OnEnabled()
+#else
+        public override void Enable()
+#endif
         {
             Instance = this;
 
+            RegisterEvents();
+#if EXILED
             Assembly customItems = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name == "Exiled.CustomItems");
 
             if (customItems is not null)
@@ -38,30 +52,41 @@ namespace ShootingInteractions
                 Type customItemType = customItems.GetType("Exiled.CustomItems.API.Features.CustomItem");
                 GetCustomItem = customItemType?.GetMethod("TryGet", new[] { typeof(Pickup), customItemType.MakeByRefType() });
             }
-
-            RegisterEvents();
             base.OnEnabled();
+#endif
         }
 
+#if EXILED
         public override void OnDisabled()
+#else
+        public override void Disable()
+#endif
         {
             UnregisterEvents();
 
             Instance = null;
-
+#if EXILED
             base.OnDisabled();
+#endif
         }
 
         public void RegisterEvents()
         {
             eventsHandler = new EventsHandler();
-
-            PlayerEvent.Shot += eventsHandler.OnShot;
+#if EXILED
+            PlayerEvents.Shot += eventsHandler.OnShot;
+#else
+            PlayerEvents.ShotWeapon += eventsHandler.OnShot;
+#endif
         }
 
         public void UnregisterEvents()
         {
-            PlayerEvent.Shot -= eventsHandler.OnShot;
+#if EXILED
+            PlayerEvents.Shot += eventsHandler.OnShot;
+#else
+            PlayerEvents.ShotWeapon -= eventsHandler.OnShot;
+#endif
 
             eventsHandler = null;
         }
