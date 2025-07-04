@@ -101,7 +101,7 @@ A plugin that adds new interactions when shooting on objects!
 
 ## Download
 
-This plugin requires [Exiled](https://github.com/ExSLMod-Team/EXILED/releases/tag/v9.6.0).
+This plugin requires [Exiled](https://github.com/ExMod-Team/EXILED/) or [LabAPI](https://github.com/northwood-studios/LabAPI/).
 
 You can download the latest version of ShootingInteractions [here](https://github.com/Unbistrackted/ShootingInteractions/releases/latest).
 
