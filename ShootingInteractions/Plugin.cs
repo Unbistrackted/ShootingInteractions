@@ -87,7 +87,6 @@ namespace ShootingInteractions
 #else
             PlayerEvents.ShotWeapon -= eventsHandler.OnShot;
 #endif
-
             eventsHandler = null;
         }
     }
