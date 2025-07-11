@@ -11,7 +11,6 @@ using ShootingInteractions.Configuration;
 using ShootingInteractions.Properites;
 using System;
 using System.Reflection;
-using System.Linq;
 
 namespace ShootingInteractions
 {

@@ -40,7 +40,6 @@ using LockerChamber = MapGeneration.Distributors.LockerChamber;
 using TimedGrenadePickup = InventorySystem.Items.ThrowableProjectiles.TimedGrenadePickup;
 using ThrowableItem = InventorySystem.Items.ThrowableProjectiles.ThrowableItem;
 using Footprinting;
-using static UnityWebRequestDispatcher;
 
 namespace ShootingInteractions
 {
