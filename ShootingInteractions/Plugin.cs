@@ -3,6 +3,7 @@ using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.API.Features.Pickups;
 using PlayerEvents = Exiled.Events.Handlers.Player;
+using System.Linq;
 # else
 using LabApi.Loader.Features.Plugins;
 using LabApi.Events.Handlers;
