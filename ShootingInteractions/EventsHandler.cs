@@ -353,7 +353,7 @@ namespace ShootingInteractions
                     || elevator is null
                     || isMoving
                     || !elevator.Base.IsReady
-                    || (isLocked && isBypassEnabled)
+                    || (isLocked && !isBypassEnabled)
                     || !ElevatorDoor.AllElevatorDoors.TryGetValue(panel.AssignedChamber.AssignedGroup, out List<ElevatorDoor> list))
                     return true;
 
@@ -388,8 +388,6 @@ namespace ShootingInteractions
 #else
                 elevator.SetDestination(panel.AssignedChamber.NextLevel);
 #endif
-
-
 
                 // Lock the door if it should be locked AFTER moving
                 if (shoudLock && elevatorInteractionConfig.MoveBeforeLocking)
@@ -598,7 +596,6 @@ namespace ShootingInteractions
                 bool isKeycardActivated = Warhead.IsAuthorized;
                 bool canBeStarted = Warhead.IsDetonationInProgress && !Warhead.IsDetonated && Warhead.BaseController?.CooldownEndTime <= NetworkTime.time;
 #endif
-
 
                 // Return if:
                 //  - interaction isn't enabled

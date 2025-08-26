@@ -45,6 +45,6 @@ namespace ShootingInteractions.Properites
         internal const string Copyright = "Copyright ©  2025";
         internal const string Description = "Custom interactions when shooting with weapons!";
         internal const string Id = "unbistrackted.ShootingInteractions";
-        internal const string Version = "2.5.3";
+        internal const string Version = "2.5.4";
     }
 }

@@ -45,7 +45,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="ExMod.Exiled">
-			<Version>9.6.1</Version>
+			<Version>9.8.1</Version>
 		</PackageReference>
 	</ItemGroup>
 		
