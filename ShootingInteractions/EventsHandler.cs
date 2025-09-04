@@ -195,10 +195,10 @@ namespace ShootingInteractions
 
                     // Unlock the door after the time indicated in the config (if greater than 0)
                     if (doorInteractionConfig.LockDuration > 0)
-                        Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.Lock(DoorLockReason.None, false));
+                        Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.Lock(DoorLockReason.Isolation, false));
 #endif
                     // Don't interact if bypass mode is disabled
-                    if (isBypassEnabled)
+                    if (!isBypassEnabled)
                         return true;
                 }
 
@@ -227,7 +227,7 @@ namespace ShootingInteractions
 
                         // Unlock the door after the time indicated in the config (if greater than 0)
                         if (doorInteractionConfig.LockDuration > 0)
-                            Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.Lock(DoorLockReason.None, false));
+                            Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.Lock(DoorLockReason.Isolation, false));
 #endif
                     });
 
