@@ -268,7 +268,7 @@ namespace ShootingInteractions
                         return true;
 
                     // Deny access if bypass mode is disabled and either: remote keycard is disabled OR the player has no keycard that open the locker
-                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || HasPermission(player.ReferenceHub, expLocker.Chamber.Base)))
+                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player.ReferenceHub, expLocker.Chamber.Base)))
                     {
                         expLocker.PlayDeniedSound(expLocker.RequiredPermissions);
                         return true;
