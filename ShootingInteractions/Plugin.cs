@@ -25,10 +25,10 @@ namespace ShootingInteractions
 
         public override string Author => AssemblyInfo.Author;
 #if EXILED
-        public override Version RequiredExiledVersion => new(9, 8, 1);
+        public override Version RequiredExiledVersion => new(9, 9, 2);
         public override PluginPriority Priority => PluginPriority.First;
 #else
-        public override Version RequiredApiVersion => new(1, 1, 1);
+        public override Version RequiredApiVersion => new(1, 1, 2);
         public override string Description => AssemblyInfo.Description;
 #endif
 
