@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Restore Packages
+        run: nuget restore RemoteKeycard.sln
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Download references
+        run: Invoke-WebRequest -Uri "https://exmod-team.github.io/SL-References/Dev.zip" -OutFile "References.zip"
+
+      - name: Extract Refs
+        run: |
+          mkdir ShootingInteractions\lib
+          tar -xf References.zip -C ShootingInteractions/lib
+          
+      - name: Build EXILED
+        run: msbuild ShootingInteractions.sln -p:Configuration=EXILED
+
+      - name: Build LabAPI
+        run: msbuild ShootingInteractions.sln -p:Configuration=LabAPI
+
+      - name: Create Release with Dlls
+        uses: softprops/action-gh-release@v2
+        id: create_release
+        with:
+          generate_release_notes: true
+          files: |
+            RemoteKeycard/bin/EXILED/ShootingInteractions-EXILED.dll
+            RemoteKeycard/bin/LabAPI/ShootingInteractions-LabAPI.dll
