@@ -37,5 +37,5 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            RemoteKeycard/bin/EXILED/ShootingInteractions-EXILED.dll
-            RemoteKeycard/bin/LabAPI/ShootingInteractions-LabAPI.dll
+            RemoteKeycard/bin/EXILED/net48/ShootingInteractions-EXILED.dll
+            RemoteKeycard/bin/LabAPI/net48/ShootingInteractions-LabAPI.dll
