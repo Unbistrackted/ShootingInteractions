@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Restore Packages
-        run: nuget restore RemoteKeycard.sln
+        run: nuget restore ShootingInteractions.sln
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
