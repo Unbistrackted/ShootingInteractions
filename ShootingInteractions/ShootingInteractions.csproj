@@ -43,10 +43,13 @@
 		</Reference>
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="ExMod.Exiled">
-			<Version>9.9.2</Version>
-		</PackageReference>
+	<ItemGroup Condition="'$(Configuration)' == 'EXILED'">
+		<PackageReference Include="ExMod.Exiled" Version="9.13.1" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)' == 'LabAPI'">
+		<PackageReference Include="Northwood.LabAPI" Version="1.1.5" />
+		<Reference Include="Assembly-CSharp-Publicized" HintPath="$(EXILED_References)\Assembly-CSharp-Publicized.dll" Private="false" />
 	</ItemGroup>
 		
 
