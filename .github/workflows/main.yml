@@ -12,10 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Restore Packages
-        run: nuget restore ShootingInteractions.sln
-
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
+        run: dotnet restore ShootingInteractions.sln
 
       - name: Download references
         run: Invoke-WebRequest -Uri "https://exmod-team.github.io/SL-References/Dev.zip" -OutFile "References.zip"
@@ -26,10 +23,10 @@ jobs:
           tar -xf References.zip -C ShootingInteractions/lib
           
       - name: Build EXILED
-        run: msbuild ShootingInteractions.sln -p:Configuration=EXILED
+        run: dotnet build ShootingInteractions.sln -c EXILED
 
       - name: Build LabAPI
-        run: msbuild ShootingInteractions.sln -p:Configuration=LabAPI
+        run: dotnet build ShootingInteractions.sln -c LabAPI
 
       - name: Create Release with Dlls
         uses: softprops/action-gh-release@v2
