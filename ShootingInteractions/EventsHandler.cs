@@ -10,7 +10,9 @@ using PlayerShotWeaponEventArgs = Exiled.Events.EventArgs.Player.ShotEventArgs;
 #else
 using LabApi.Features.Wrappers;
 using Firearm = LabApi.Features.Wrappers.FirearmItem;
+using Keycard = LabApi.Features.Wrappers.KeycardItem;
 using LabApi.Events.Arguments.PlayerEvents;
+using Log = LabApi.Features.Console.Logger;
 #endif
 using Interactables.Interobjects;
 using Interactables.Interobjects.DoorButtons;
@@ -41,6 +43,7 @@ using ExperimentalWeaponLocker = MapGeneration.Distributors.ExperimentalWeaponLo
 using LockerChamber = MapGeneration.Distributors.LockerChamber;
 using TimedGrenadePickup = InventorySystem.Items.ThrowableProjectiles.TimedGrenadePickup;
 using ThrowableItem = InventorySystem.Items.ThrowableProjectiles.ThrowableItem;
+using InventorySystem.Items.Keycards;
 
 namespace ShootingInteractions
 {
@@ -105,6 +108,15 @@ namespace ShootingInteractions
         /// <returns>If the GameObject was interacted with.</returns>
         public static bool Interact(Player player, GameObject gameObject, Firearm firearm, Vector3 direction)
         {
+            if (Config.Debug)
+            {
+                Log.Debug(gameObject.name);
+                Log.Debug(gameObject.layer);
+                Log.Debug(string.Join(", ", gameObject.GetComponents<Component>().ToList()));
+                Log.Debug(string.Join(", ", gameObject.GetComponentsInParent<Component>().ToList()));
+                Log.Debug(string.Join(", ", gameObject.GetComponentsInChildren<Component>().ToList()));
+            }
+
             float penetration = 0;
             bool hasInteracted = false;
 
@@ -196,7 +208,7 @@ namespace ShootingInteractions
                 }
 
                 // Deny access if the door is a keycard door, bypass mode is disabled, and either: remote keycard is disabled OR the player has no keycard that open the door
-                if (doorVariant.RequiredPermissions.RequiredPermissions != DoorPermissionFlags.None && !isBypassEnabled && (!doorInteractionConfig.RemoteKeycard || !HasPermission(player.ReferenceHub, doorVariant)))
+                if (doorVariant.RequiredPermissions.RequiredPermissions != DoorPermissionFlags.None && !isBypassEnabled && (!doorInteractionConfig.RemoteKeycard || !HasPermission(player, doorVariant)))
                 {
                     door.Base.PermissionsDenied(null, 0);
                     return false;
@@ -261,7 +273,7 @@ namespace ShootingInteractions
                         return false;
 
                     // Deny access if bypass mode is disabled and either: remote keycard is disabled OR the player has no keycard that open the locker
-                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player.ReferenceHub, expLocker.Chamber.Base)))
+                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player, expLocker.Chamber.Base)))
                     {
                         expLocker.PlayDeniedSound(expLocker.RequiredPermissions);
                         return false;
@@ -280,7 +292,7 @@ namespace ShootingInteractions
                         return false;
 
                     // Deny access if bypass mode is disabled and either: remote keycard is disabled OR the player has no keycard that open the locker
-                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player.ReferenceHub, chamber)))
+                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player, chamber)))
                     {
                         locker.RpcPlayDenied((byte)locker.Chambers.ToList().IndexOf(chamber), chamber.RequiredPermissions);
                         return false;
@@ -301,7 +313,7 @@ namespace ShootingInteractions
                         return false;
 
                     // Deny access if bypass mode is disabled and either: remote keycard is disabled OR the player has no keycard that open the locker
-                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player.ReferenceHub, locker.Chambers.First())))
+                    if (!isBypassEnabled && (!lockerInteractionConfig.RemoteKeycard || !HasPermission(player, locker.Chambers.First())))
                     {
                         locker.RpcPlayDenied(locker.ComponentIndex, rifleRackLocker.RequiredPermissions);
                         return false;
@@ -578,7 +590,7 @@ namespace ShootingInteractions
                     return false;
 
                 // Stops the nuke detonation
-                AlphaWarheadController.Singleton?.CancelDetonation(player.ReferenceHub);
+                Warhead.Stop(player);
 
                 hasInteracted = true;
             }
@@ -593,7 +605,7 @@ namespace ShootingInteractions
             else if (gameObject.GetComponentInParent<InteractableCollider>() is not null && gameObject.name.Contains("Button") && player.Room.Zone == MapGeneration.FacilityZone.Surface)
             {
                 bool isKeycardActivated = Warhead.IsAuthorized;
-                bool canBeStarted = Warhead.IsDetonationInProgress && !Warhead.IsDetonated && Warhead.BaseController?.CooldownEndTime <= NetworkTime.time;
+                bool canBeStarted = !Warhead.IsDetonationInProgress && !Warhead.IsDetonated && Warhead.BaseController?.CooldownEndTime <= NetworkTime.time;
 #endif
 
                 // Return if:
@@ -618,14 +630,24 @@ namespace ShootingInteractions
             return hasInteracted;
         }
 
-        private static bool HasPermission(ReferenceHub player, IDoorPermissionRequester permissionFlags)
+        private static bool HasPermission(Player player, IDoorPermissionRequester requester)
         {
-#if EXILED
-            // Thanks obvevelyn !!
-            return Player.Get(player).Items.Any(item => item is Keycard keycard && item.Base is IDoorPermissionProvider itemProvider && permissionFlags.PermissionsPolicy.CheckPermissions(itemProvider.GetPermissions(permissionFlags)));
-#else
-            return Player.Get(player).Items.Any(item => item is KeycardItem keycard && item.Base is IDoorPermissionProvider itemProvider && permissionFlags.PermissionsPolicy.CheckPermissions(itemProvider.GetPermissions(permissionFlags)));
-#endif
+            foreach (Item item in player.Items)
+            {
+                if (item.Base is not IDoorPermissionProvider provider)
+                    continue;
+
+                if (!requester.CheckPermissions(provider, out PermissionUsed callback))
+                    continue;
+
+                // Callback is null if the door/provider doesn't have any permission/none flag.
+                if (callback != null && item.Base is SingleUseKeycardItem singleUseKeycard)
+                    singleUseKeycard._destroyed = true;
+
+                return true;
+            }
+
+            return false;
         }
     }
 }
