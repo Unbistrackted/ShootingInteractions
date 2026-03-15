@@ -194,13 +194,13 @@ namespace ShootingInteractions
 
                     // Unlock the door after the time indicated in the config (if greater than 0)
                     if (doorInteractionConfig.LockDuration > 0)
-                        Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.ChangeLock(DoorLockType.None));
+                        Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door?.ChangeLock(DoorLockType.None));
 #else
                     door.Lock(DoorLockReason.Isolation, true);
 
                     // Unlock the door after the time indicated in the config (if greater than 0)
                     if (doorInteractionConfig.LockDuration > 0)
-                        Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.Lock(DoorLockReason.Isolation, false));
+                        Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door?.Lock(DoorLockReason.Isolation, false));
 #endif
                     // Don't interact if bypass mode is disabled
                     if (!isBypassEnabled)
@@ -226,13 +226,13 @@ namespace ShootingInteractions
 
                         // Unlock the door after the time indicated in the config (if greater than 0)
                         if (doorInteractionConfig.LockDuration > 0)
-                            Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.ChangeLock(DoorLockType.None));
+                            Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door?.ChangeLock(DoorLockType.None));
 #else
                         door.Lock(DoorLockReason.Isolation, true);
 
                         // Unlock the door after the time indicated in the config (if greater than 0)
                         if (doorInteractionConfig.LockDuration > 0)
-                            Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door.Lock(DoorLockReason.Isolation, false));
+                            Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door?.Lock(DoorLockReason.Isolation, false));
 #endif
                     });
 
@@ -376,6 +376,11 @@ namespace ShootingInteractions
                         {
                             foreach (ElevatorDoor door in list)
                             {
+                                if (door == null)
+                                {
+                                    continue;
+                                }
+
                                 door.NetworkActiveLocks = 0;
                                 DoorEvents.TriggerAction(door, DoorAction.Unlocked, null);
                             }
