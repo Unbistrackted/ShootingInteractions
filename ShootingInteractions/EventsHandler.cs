@@ -57,12 +57,12 @@ namespace ShootingInteractions
         /// <summary>
         /// A list of gameobjects that cannot be interacted with.
         /// </summary>
-        public static List<GameObject> BlacklistedObjects = new();
+        public static List<GameObject> BlacklistedObjects = new List<GameObject>();
 
         /// <summary>
         /// The shot event. Used for accurate shooting interaction.
         /// </summary>
-        /// <param name="args">The <see cref="ShotEventArgs"/>.</param>
+        /// <param name="args">The <see cref="PlayerShotWeaponEventArgs"/>.</param>
         public void OnShot(PlayerShotWeaponEventArgs args)
         {
 #if EXILED
@@ -75,7 +75,7 @@ namespace ShootingInteractions
             FirearmItem firearm = args.FirearmItem;
 #endif
 
-            // Check what's the player shooting at with a raycast, and return if the raycast doesn't hit something within 70 distance (maximum realistic distance)
+            // Check what the player is shooting at with a raycast, and return if the raycast doesn't hit something within 70 distance (maximum realistic distance)
             // Layer 1 = VolumeOverrideTunne
             // Layer 13 = Player's Hitboxes
             // Layer 16 = Surface Gate A Bridge
@@ -85,17 +85,16 @@ namespace ShootingInteractions
                 return;
 
             // Interact if the object isn't in the blacklist
-            if (!BlacklistedObjects.Contains(raycastHit.transform.gameObject) && Interact(args.Player, raycastHit.transform.gameObject, firearm, direction))
-            {
+            if (BlacklistedObjects.Contains(raycastHit.transform.gameObject) || !Interact(args.Player, raycastHit.transform.gameObject, firearm, direction))
+                return;
 #if EXILED
-                args.Player.ShowHitMarker();
+            args.Player.ShowHitMarker();
 #else
-                args.Player.SendHitMarker();
+            args.Player.SendHitMarker();
 #endif
-                // Add the GameObject in the blacklist for a server tick
-                BlacklistedObjects.Add(raycastHit.transform.gameObject);
-                Timing.CallDelayed(Time.smoothDeltaTime, () => BlacklistedObjects.Remove(raycastHit.transform.gameObject));
-            }
+            // Add the GameObject in the blacklist for a server tick
+            BlacklistedObjects.Add(raycastHit.transform.gameObject);
+            Timing.CallDelayed(Time.smoothDeltaTime, () => BlacklistedObjects.Remove(raycastHit.transform?.gameObject));
         }
 
         /// <summary>
@@ -134,7 +133,7 @@ namespace ShootingInteractions
             {
                 //Interactables.Interobjects.CheckpointDoor
                 //Interactables.Interobjects.PryableDoor
-                // Get the door associated to the button
+                // Get the door associated with the button
                 Door door = Door.Get(button.GetComponentInParent<DoorVariant>());
                 DoorVariant doorVariant = button.GetComponentInParent<DoorVariant>();
 
@@ -183,7 +182,7 @@ namespace ShootingInteractions
                     }
                 }
 
-                // Should the door get locked ? (Generate number from 1 to 100 then check if lesser than interaction percentage)
+                // Should the door get locked? (Generate number from 1 to 100 then check if lesser than interaction percentage)
                 bool shouldLock = !door.IsLocked && Random.Range(1, 101) <= doorInteractionConfig.LockChance;
 
                 // Lock the door if it should be locked BEFORE moving
@@ -228,10 +227,10 @@ namespace ShootingInteractions
                         if (doorInteractionConfig.LockDuration > 0)
                             Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door?.ChangeLock(DoorLockType.None));
 #else
-                        door.Lock(DoorLockReason.Isolation, true);
+                        door?.Lock(DoorLockReason.Isolation, true);
 
                         // Unlock the door after the time indicated in the config (if greater than 0)
-                        if (doorInteractionConfig.LockDuration > 0)
+                        if (doorInteractionConfig?.LockDuration > 0)
                             Timing.CallDelayed(doorInteractionConfig.LockDuration, () => door?.Lock(DoorLockReason.Isolation, false));
 #endif
                     });
@@ -339,7 +338,7 @@ namespace ShootingInteractions
                 bool isMoving = elevator.IsMoving;
 #else
                 Elevator elevator = Elevator.Get(panel.AssignedChamber);
-                bool isLocked = elevator.AnyDoorLockedReason <= 0 ? elevator.AllDoorsLockedReason > 0 : true;
+                bool isLocked = elevator.AnyDoorLockedReason > 0 || elevator.AllDoorsLockedReason > 0;
                 bool isMoving = (uint)elevator.Base.CurSequence - 2 <= 1u;
 #endif
 
@@ -353,19 +352,19 @@ namespace ShootingInteractions
                 //  - no elevator doors
                 if (!elevatorInteractionConfig.IsEnabled
                     || (elevatorInteractionConfig.MinimumPenetration / 100 >= penetration)
-                    || panel.AssignedChamber is null
-                    || elevator is null
+                    || !panel.AssignedChamber
+                    || !elevator.Base
                     || isMoving
                     || !elevator.Base.IsReady
                     || (isLocked && !isBypassEnabled)
                     || !ElevatorDoor.AllElevatorDoors.TryGetValue(panel.AssignedChamber.AssignedGroup, out List<ElevatorDoor> list))
                     return false;
 
-                // Should the elevator get locked ? (Generate a number from 1 to 100 then check if it's lesser than config percentage)
-                bool shoudLock = !isLocked && Random.Range(1, 101) <= elevatorInteractionConfig.LockChance;
+                // Should the elevator get locked? (Generate a number from 1 to 100, then check if it's lesser than config percentage)
+                bool shouldLock = !isLocked && Random.Range(1, 101) <= elevatorInteractionConfig.LockChance;
 
                 // Lock the door if it should be locked BEFORE moving
-                if (shoudLock && !elevatorInteractionConfig.MoveBeforeLocking)
+                if (shouldLock && !elevatorInteractionConfig.MoveBeforeLocking)
                 {
                     foreach (ElevatorDoor door in list)
                         door.ServerChangeLock(DoorLockReason.Isolation, true);
@@ -376,7 +375,7 @@ namespace ShootingInteractions
                         {
                             foreach (ElevatorDoor door in list)
                             {
-                                if (door == null)
+                                if (!door)
                                 {
                                     continue;
                                 }
@@ -399,7 +398,7 @@ namespace ShootingInteractions
 #endif
 
                 // Lock the door if it should be locked AFTER moving
-                if (shoudLock && elevatorInteractionConfig.MoveBeforeLocking)
+                if (shouldLock && elevatorInteractionConfig.MoveBeforeLocking)
                 {
                     foreach (ElevatorDoor door in list)
                         door.ServerChangeLock(DoorLockReason.Isolation, true);
@@ -461,9 +460,7 @@ namespace ShootingInteractions
                     ThrownProjectile grenadeProjectile = Object.Instantiate(grenadeThrowable.Projectile);
 
                     // Set the physics of the projectile
-                    PickupStandardPhysics grenadeProjectilePhysics = grenadeProjectile.PhysicsModule as PickupStandardPhysics;
-                    PickupStandardPhysics grenadePickupPhysics = grenadePickup.PhysicsModule as PickupStandardPhysics;
-                    if (grenadeProjectilePhysics is not null && grenadePickupPhysics is not null)
+                    if (grenadeProjectile.PhysicsModule is PickupStandardPhysics grenadeProjectilePhysics && grenadePickup.PhysicsModule is PickupStandardPhysics grenadePickupPhysics)
                     {
                         Rigidbody grenadeProjectileRigidbody = grenadeProjectilePhysics.Rb;
                         Rigidbody grenadePickupRigidbody = grenadePickupPhysics.Rb;
@@ -486,11 +483,11 @@ namespace ShootingInteractions
                     // Spawn the grenade projectile
                     NetworkServer.Spawn(grenadeProjectile.gameObject);
 
-                    // Should the grenade have a custom fuse time ? (Generate number from 1 to 100 then check if lesser than interaction percentage)
+                    // Should the grenade have a custom fuse time? (Generate number from 1 to 100, then check if lesser than interaction percentage)
                     if (Random.Range(1, 101) <= grenadeInteractionConfig.CustomFuseTimeChance)
 
                         // Set the custom fuse time
-                        (grenadeProjectile as TimeGrenade)._fuseTime = Mathf.Max(Time.smoothDeltaTime * 2, grenadeInteractionConfig.CustomFuseTimeDuration);
+                        (grenadeProjectile as TimeGrenade)!._fuseTime = Mathf.Max(Time.smoothDeltaTime * 2, grenadeInteractionConfig.CustomFuseTimeDuration);
 
                     // Activate the projectile and destroy the pickup
                     grenadeProjectile.ServerActivate();
@@ -520,8 +517,7 @@ namespace ShootingInteractions
                 ThrownProjectile scp018Projectile = Object.Instantiate(grenadeThrowable.Projectile);
 
                 // Set the physics of the projectile
-                PickupStandardPhysics grenadeProjectilePhysics = scp018Projectile.PhysicsModule as PickupStandardPhysics;
-                if (grenadeProjectilePhysics is not null)
+                if (scp018Projectile.PhysicsModule is PickupStandardPhysics grenadeProjectilePhysics)
                 {
                     Rigidbody grenadeProjectileRigidbody = grenadeProjectilePhysics.Rb;
                     grenadeProjectileRigidbody.position = scp018.Position;
@@ -540,11 +536,11 @@ namespace ShootingInteractions
                 scp018.PreviousOwner = new Footprint(player.ReferenceHub);
                 scp018Projectile.PreviousOwner = new Footprint(player.ReferenceHub);
 
-                // Should the grenade have a custom fuse time ? (Generate number from 1 to 100 then check if lesser than interaction percentage)
+                // Should the grenade have a custom fuse time? (Generate number from 1 to 100 then check if lesser than interaction percentage)
                 if (Random.Range(1, 101) <= grenadeInteractionConfig.CustomFuseTimeChance)
 
                     // Set the custom fuse time
-                    (scp018Projectile as TimeGrenade)._fuseTime = Mathf.Max(Time.smoothDeltaTime * 2, grenadeInteractionConfig.CustomFuseTimeDuration);
+                    (scp018Projectile as TimeGrenade)!._fuseTime = Mathf.Max(Time.smoothDeltaTime * 2, grenadeInteractionConfig.CustomFuseTimeDuration);
 
                 // Activate the projectile and destroy the pickup
                 scp018Projectile.ServerActivate();
@@ -585,7 +581,7 @@ namespace ShootingInteractions
             }
 
             // Nuke Cancel Button
-            else if (gameObject.GetComponentInParent<AlphaWarheadNukesitePanel>() is AlphaWarheadNukesitePanel warheadAlpha && gameObject.name.Contains("cancel"))
+            else if (gameObject.GetComponentInParent<AlphaWarheadNukesitePanel>() && gameObject.name.Contains("cancel"))
             {
                 // Return if:
                 //  - interaction isn't enabled
@@ -607,7 +603,7 @@ namespace ShootingInteractions
                 bool canBeStarted = Warhead.CanBeStarted;
 #else
             // Nuke Start Button
-            else if (gameObject.GetComponentInParent<InteractableCollider>() is not null && gameObject.name.Contains("Button") && player.Room.Zone == MapGeneration.FacilityZone.Surface)
+            else if (gameObject.GetComponentInParent<InteractableCollider>() && gameObject.name.Contains("Button") && player.Room?.Zone == MapGeneration.FacilityZone.Surface)
             {
                 bool isKeycardActivated = Warhead.IsAuthorized;
                 bool canBeStarted = !Warhead.IsDetonationInProgress && !Warhead.IsDetonated && Warhead.BaseController?.CooldownEndTime <= NetworkTime.time;
@@ -637,7 +633,14 @@ namespace ShootingInteractions
 
         private static bool HasPermission(Player player, IDoorPermissionRequester requester)
         {
-            foreach (Item item in player.Items)
+            if (requester == null)
+            {
+                return false;
+            }
+            
+            IEnumerable<Item> items = player.Items;
+            
+            foreach (Item item in items)
             {
                 if (item.Base is not IDoorPermissionProvider provider)
                     continue;
